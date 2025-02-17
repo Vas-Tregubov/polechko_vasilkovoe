@@ -6,13 +6,6 @@ const token = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
 const chatIdVasya = import.meta.env.VITE_TELEGRAM_CHAT_ID_VASYA;
 const chatIdPolina = import.meta.env.VITE_TELEGRAM_CHAT_ID_POLINA;
 
-// Функция экранирования для MarkdownV2
-const escapeMarkdownV2 = (text: string) => {
-  return text
-    .replace(/([_*[\]()~`>#+\-=|{}.^$\/?\\])/g, "\\$1") // Экранируем спецсимволы
-    .trim(); // Убираем лишние пробелы и пустые строки
-};
-
 export const SurveyForm = () => {
   const [formData, setFormData] = useState({
     question1: "",
@@ -24,9 +17,10 @@ export const SurveyForm = () => {
     question7: "",
     question8: "",
     question9: "",
+    sender: "Полечка", // Изменили Полина на Полечка
   });
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = event.target;
 
     event.target.style.height = "auto"; // Сбрасываем высоту
@@ -38,17 +32,22 @@ export const SurveyForm = () => {
     });
   };
 
+  const handleSenderChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    setFormData({
+      ...formData,
+      sender: value, // Обновляем отправителя
+    });
+  };
+
   // Функция отправки данных в Telegram
   const sendMessageToTelegram = async (message: string, chatId: string) => {
     try {
-      const escapedMessage = escapeMarkdownV2(message);
-
       const response = await axios.post(
         `https://api.telegram.org/bot${token}/sendMessage`,
         {
           chat_id: chatId,
-          text: escapedMessage,
-          parse_mode: "MarkdownV2", // Используем MarkdownV2
+          text: message, // Отправляем сообщение как есть, без парсинга
         }
       );
       console.log(`Сообщение отправлено в чат ${chatId}:`, response.data);
@@ -65,12 +64,18 @@ export const SurveyForm = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    console.log(formData);
+
     const formatText = (label: string, text: string) => {
       const cleanText = text.trim();
-      return cleanText ? `*${label}*\n${escapeMarkdownV2(cleanText)}` : "";
+      return cleanText ? `${label}\n${cleanText}` : "";
     };
 
+    // Добавим информацию о том, кто отправляет сообщение
+    const senderMessage = `Отправитель: ${formData.sender}\n`;
+
     const message = [
+      senderMessage, // Вставляем имя отправителя
       formatText("Какие чувства ты сейчас испытываешь?", formData.question1),
       formatText("Что могло бы помочь тебе в этот момент?", formData.question2),
       formatText(
@@ -114,11 +119,25 @@ export const SurveyForm = () => {
       question7: "",
       question8: "",
       question9: "",
+      sender: "Полечка", // Сбросить имя отправителя на Полечка
     });
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="sender">Отправитель</label>
+        <select
+          id="sender"
+          name="sender"
+          value={formData.sender}
+          onChange={handleSenderChange} // Используем новый обработчик
+        >
+          <option value="Полечка">Полечка</option>
+          <option value="Васенька">Васенька</option> {/* Изменили Вася на Васенька */}
+        </select>
+      </div>
+
       <div>
         <label htmlFor="question1">
           Какие чувства ты сейчас испытываешь (гнев, печаль, тревога, радость)?
@@ -127,7 +146,7 @@ export const SurveyForm = () => {
           id="question1"
           name="question1"
           value={formData.question1}
-          onChange={handleChange}
+          onChange={handleTextChange} // Для текстовых полей используем старый обработчик
           rows={1}
         />
       </div>
@@ -141,7 +160,7 @@ export const SurveyForm = () => {
           id="question2"
           name="question2"
           value={formData.question2}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -154,7 +173,7 @@ export const SurveyForm = () => {
           id="question3"
           name="question3"
           value={formData.question3}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -167,7 +186,7 @@ export const SurveyForm = () => {
           id="question4"
           name="question4"
           value={formData.question4}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -180,7 +199,7 @@ export const SurveyForm = () => {
           id="question5"
           name="question5"
           value={formData.question5}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -193,7 +212,7 @@ export const SurveyForm = () => {
           id="question6"
           name="question6"
           value={formData.question6}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -204,7 +223,7 @@ export const SurveyForm = () => {
           id="question7"
           name="question7"
           value={formData.question7}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -217,7 +236,7 @@ export const SurveyForm = () => {
           id="question8"
           name="question8"
           value={formData.question8}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
@@ -230,7 +249,7 @@ export const SurveyForm = () => {
           id="question9"
           name="question9"
           value={formData.question9}
-          onChange={handleChange}
+          onChange={handleTextChange}
           rows={1}
         />
       </div>
