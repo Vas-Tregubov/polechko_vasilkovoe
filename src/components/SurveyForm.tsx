@@ -9,7 +9,7 @@ const chatIdPolina = import.meta.env.VITE_TELEGRAM_CHAT_ID_POLINA;
 // Функция экранирования для MarkdownV2
 const escapeMarkdownV2 = (text: string) => {
   return text
-    .replace(/([_*[\]()~`>#+\-=|{}.!^$\/?\\])/g, "\\$1") // Экранируем спецсимволы
+    .replace(/([_*[\]()~`>#+\-=|{}.^$\/?\\])/g, "\\$1") // Экранируем спецсимволы
     .trim(); // Убираем лишние пробелы и пустые строки
 };
 
