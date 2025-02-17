@@ -3,7 +3,8 @@ import "./SurveyForm.css";
 import axios from "axios";
 
 const token = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
-const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
+const chatIdVasya = import.meta.env.VITE_TELEGRAM_CHAT_ID_VASYA;
+const chatIdPolina = import.meta.env.VITE_TELEGRAM_CHAT_ID_POLINA;
 
 // Функция экранирования для MarkdownV2
 const escapeMarkdownV2 = (text: string) => {
@@ -38,7 +39,7 @@ export const SurveyForm = () => {
   };
 
   // Функция отправки данных в Telegram
-  const sendMessageToTelegram = async (message: string) => {
+  const sendMessageToTelegram = async (message: string, chatId: string) => {
     try {
       const escapedMessage = escapeMarkdownV2(message);
 
@@ -50,7 +51,7 @@ export const SurveyForm = () => {
           parse_mode: "MarkdownV2", // Используем MarkdownV2
         }
       );
-      console.log("Сообщение отправлено:", response.data);
+      console.log(`Сообщение отправлено в чат ${chatId}:`, response.data);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error("Ошибка от Telegram:", error.response?.data);
@@ -98,8 +99,11 @@ export const SurveyForm = () => {
       .filter(Boolean) // Убираем пустые строки
       .join("\n\n"); // Делаем четкий разрыв между блоками
 
-    sendMessageToTelegram(message);
+    // Отправка сообщения в оба чата
+    sendMessageToTelegram(message, chatIdVasya);
+    sendMessageToTelegram(message, chatIdPolina);
 
+    // Очистка формы после отправки
     setFormData({
       question1: "",
       question2: "",
